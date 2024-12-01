@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from app.controller import FaceRecognitionController
 from app.libs.firebase_logger import FirebaseAuthenticationLogs
 from app.libs.auth import check_api_key
-import models.schemas as schemas
+import app.models.schemas as schemas
 from app.libs.exception_handler import app_exception_handler
 import os
 

@@ -5,12 +5,12 @@ import numpy as np
 from app.libs.algorithm.facedet.box_utils import predict
 from app.libs.algorithm.pipeline import ImagePreprocessor
 from app.libs.algorithm.pipeline import FaceRecognition
-from models.schemas import (
+from app.models.schemas import (
     FaceRecognitionRequest,
     DefaultResponse,
     UserCreationRequest,
 )
-from db.prisma import db
+from app.db.prisma import db
 import base64
 import cv2 as cv
 from prisma import Base64

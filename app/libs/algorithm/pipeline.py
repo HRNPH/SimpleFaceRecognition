@@ -2,9 +2,9 @@ from typing import Dict, List, Tuple, Union
 import onnxruntime as ort
 import numpy as np
 import cv2 as cv
-from tqdm import tqdm
-
 from app.libs.algorithm.facedet.box_utils import predict
+
+ort.set_default_logger_severity(3)  # Disable onnx logger
 
 
 class ImagePreprocessor:
