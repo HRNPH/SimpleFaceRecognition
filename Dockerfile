@@ -33,6 +33,7 @@ ENV PORT=8000
 EXPOSE $PORT
 
 # Run the application
+ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["gunicorn", "-w", "1", "-k", "uvicorn.workers.UvicornWorker", "--bind", "[::]:8000", "app.main:app", "--timeout", "120"]
 
 # Add a healthcheck
