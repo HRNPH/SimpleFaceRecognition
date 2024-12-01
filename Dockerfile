@@ -34,13 +34,13 @@ FROM base-${INSTALL_DEPENDENCIES} AS final
 
 # copy all the application code
 COPY . ./
+RUN prisma generate
 
 # create a non-root user and switch to it, for security.
 RUN addgroup --system --gid 1001 "app-user"
 RUN adduser --system --uid 1001 "app-user"
 USER "app-user"
 
-RUN prisma generate
 
 ENTRYPOINT ["/bin/sh", "-c"]
 # default port is 8000 but can be overridden
