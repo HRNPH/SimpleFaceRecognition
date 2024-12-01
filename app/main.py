@@ -47,6 +47,7 @@ async def inference(
     firebase_logger.log(
         schemas.FirebaseLog(
             **response.model_dump(),
+            image_base64=data.image_base64,
         )
     )
     return response

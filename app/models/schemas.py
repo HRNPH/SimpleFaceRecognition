@@ -86,6 +86,9 @@ class FirebaseLog(DefaultResponse):  # Extend DefaultResponse
     createdAt: datetime = Field(
         ..., description="Time of creation of the log.", default_factory=datetime.now
     )
+    image_base64: Optional[str] = Field(
+        None, description="Base64 encoded image of the individual."
+    )
 
     def to_firebase_dict(self):
         """Convert the object to a dictionary for Firebase."""
