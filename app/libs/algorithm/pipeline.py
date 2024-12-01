@@ -4,7 +4,7 @@ import numpy as np
 import cv2 as cv
 from tqdm import tqdm
 
-from libs.algorithm.facedet.box_utils import predict
+from app.libs.algorithm.facedet.box_utils import predict
 
 
 class ImagePreprocessor:

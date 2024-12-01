@@ -2,9 +2,9 @@ import random
 from typing import Optional, Tuple
 from litestar import Response
 import numpy as np
-from libs.algorithm.facedet.box_utils import predict
-from libs.algorithm.pipeline import ImagePreprocessor
-from libs.algorithm.pipeline import FaceRecognition
+from app.libs.algorithm.facedet.box_utils import predict
+from app.libs.algorithm.pipeline import ImagePreprocessor
+from app.libs.algorithm.pipeline import FaceRecognition
 from models.schemas import (
     FaceRecognitionRequest,
     DefaultResponse,
@@ -14,7 +14,7 @@ from db.prisma import db
 import base64
 import cv2 as cv
 from prisma import Base64
-from libs.logging import logger
+from app.libs.logging import logger
 
 
 class FaceRecognitionController:

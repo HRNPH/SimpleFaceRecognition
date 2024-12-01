@@ -4,7 +4,7 @@ from firebase_admin import db
 from firebase_admin import credentials
 from dotenv import load_dotenv
 from models.schemas import FirebaseLog
-from libs.logging import logger
+from app.libs.logging import logger
 import os
 
 load_dotenv()
