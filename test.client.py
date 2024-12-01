@@ -75,7 +75,7 @@ class APIClient:
 if __name__ == "__main__":
     api_url = "http://localhost:8000/api/v1/"
     api_key = "kuy"
-    image_path = "local/experiment/faces/focus/source.png"
+    # image_path = "local/experiment/faces/focus/source.png"
     # image_path = "local/experiment/faces/guide/1.png"
     rfid = "test"
     name = "focus"

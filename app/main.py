@@ -67,9 +67,7 @@ async def create(
     data: schemas.UserCreationRequest,
 ) -> schemas.DefaultResponse:
     check_api_key(request.headers)  # Raises HTTPException if API key is invalid
-    response = await controller.add_face_to_database(data)
-    firebase_logger.log()
-    return
+    return await controller.add_face_to_database(data)
 
 
 app = Litestar(
