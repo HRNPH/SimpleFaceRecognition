@@ -6,6 +6,8 @@ services:
       dockerfile: Dockerfile  # Name of your Dockerfile
       args:
         INSTALL_DEPENDENCIES: prod  # Pass build-time arguments
+      platforms:
+        - linux/amd64  # Target the x86 architecture
     ports:
       - "80:8000"  # Expose the app on port 80
     environment:
