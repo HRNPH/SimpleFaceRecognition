@@ -26,21 +26,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Generate Prisma client
 RUN python -m prisma generate
 
-# Final production stage
-FROM base AS base-prod
-
-WORKDIR /app
-
-# Copy Over installed dependencies python dependencies
-COPY --from=prisma-builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-COPY --from=prisma-builder /usr/local/bin /usr/local/bin
-
-# Add application code and Prisma client
-COPY . ./
-COPY --from=prisma-builder /app/prisma ./prisma
-
-
-
 # Expose port
 ENV PORT=8000
 EXPOSE $PORT
