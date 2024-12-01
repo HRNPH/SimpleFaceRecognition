@@ -5,6 +5,8 @@ FROM python:3.12-slim AS base
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends curl git build-essential python3-setuptools \
+    libgl1 \
+    libglib2.0-0 \
     && apt-get autoremove -y \
     && apt-get clean \
     && rm -rf /var/apt/lists/* \
@@ -37,6 +39,8 @@ COPY . ./
 RUN addgroup --system --gid 1001 "app-user"
 RUN adduser --system --uid 1001 "app-user"
 USER "app-user"
+
+RUN prisma generate
 
 ENTRYPOINT ["/bin/sh", "-c"]
 # default port is 8000 but can be overridden
