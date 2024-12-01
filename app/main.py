@@ -9,7 +9,7 @@ from litestar import exceptions
 from litestar.openapi.spec import Components, SecurityScheme, Tag
 from litestar.openapi.plugins import SwaggerRenderPlugin
 from dotenv import load_dotenv
-from controller import FaceRecognitionController
+from app.controller import FaceRecognitionController
 from app.libs.firebase_logger import FirebaseAuthenticationLogs
 from app.libs.auth import check_api_key
 import models.schemas as schemas
