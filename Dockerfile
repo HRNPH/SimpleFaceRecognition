@@ -1,6 +1,6 @@
 ARG INSTALL_DEPENDENCIES=prod
 
-FROM python:3.12-slim AS base
+FROM python:3.12-bookworm AS base
 
 # Install necessary system packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
