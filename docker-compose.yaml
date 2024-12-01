@@ -1,0 +1,21 @@
+
+services:
+  app:
+    build:
+      context: .  # Path to your Dockerfile and app code
+      dockerfile: Dockerfile  # Name of your Dockerfile
+      args:
+        INSTALL_DEPENDENCIES: prod  # Pass build-time arguments
+    ports:
+      - "8000:8000"  # Map the container port to the host port
+    environment:
+      - PORT=8000  # Ensure the app listens on the right port
+    volumes:
+      - .:/app  # Mount the app code for development (optional)
+      - /root/.cache:/root/.cache  # Cache Prisma binaries for efficiency
+    command: gunicorn -w 1 -k uvicorn.workers.UvicornWorker --bind [::]:8000 app.main:app --timeout 120
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8000/"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
