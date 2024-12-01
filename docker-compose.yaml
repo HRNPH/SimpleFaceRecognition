@@ -7,7 +7,7 @@ services:
       args:
         INSTALL_DEPENDENCIES: prod  # Pass build-time arguments
     ports:
-      - "8000:8000"  # Map the container port to the host port
+      - "80:8000"  # Expose the app on port 80
     environment:
       - PORT=8000  # Ensure the app listens on the right port
     volumes:
