@@ -1,68 +1,49 @@
-# Define the dependency target (prod or dev)
 ARG INSTALL_DEPENDENCIES=prod
 
-# Base image
 FROM python:3.12-slim AS base
 
-# Install necessary system packages and clean up
+# Install necessary system packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl git build-essential python3-setuptools libgl1 libglib2.0-0 \
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y nodejs \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Stage for production dependencies
-FROM base AS base-prod
+# Stage for Prisma and Node.js
+FROM base AS prisma-builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy requirements for production
-COPY requirements.prod.txt ./
+# Copy Prisma schema and install Prisma CLI
+COPY prisma ./prisma
 
-# Install production dependencies with caching
+# Install Prisma CLI python
+COPY requirements.prod.txt ./
+RUN pip install prisma
+
+# Generate Prisma client
+RUN python -m prisma generate
+
+# Final production stage
+FROM base AS base-prod
+
+WORKDIR /app
+
+# Copy production requirements and install dependencies
+COPY requirements.prod.txt ./
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-cache-dir -r requirements.prod.txt
 
-# Stage for development dependencies
-FROM base-prod AS base-dev
-
-# Copy additional development requirements
-COPY requirements.dev.txt ./
-
-# Install development dependencies with caching
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir -r requirements.dev.txt
-
-# Final stage
-FROM base-${INSTALL_DEPENDENCIES} AS final
-
-# Set working directory
-WORKDIR /app
-
-# Copy application code
+# Add application code and Prisma client
 COPY . ./
+COPY --from=prisma-builder /app/prisma ./prisma
+COPY --from=prisma-builder /app/.prisma ./prisma/.prisma
 
-# Set Prisma binary target in schema
-RUN sed -i 's/binaryTargets = \[\]/binaryTargets = ["native", "debian-openssl-3.0.x"]/g' prisma/schema.prisma
-
-# Install Prisma CLI for generating files
-RUN npm install -g prisma
-
-# Generate Prisma files
-RUN prisma generate
-
-# Make sure Prisma binary and cache are accessible
-RUN chmod -R 777 /root/.cache/prisma-python
-
-# Set environment variable for the application port
+# Expose port
 ENV PORT=8000
-
-# Default user remains root for simplicity
-USER root
-
-# Expose the application port
 EXPOSE $PORT
 
-# Run the application with Gunicorn and Uvicorn workers
+# Run the application
 CMD ["gunicorn", "-w", "1", "-k", "uvicorn.workers.UvicornWorker", "--bind", "[::]:8000", "app.main:app", "--timeout", "120"]
 
 # Add a healthcheck
