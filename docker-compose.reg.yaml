@@ -2,6 +2,7 @@
 services:
   app:
     image: hrnph/embed:latest
+    platform: linux/amd64
     ports:
       - "80:8000"  # Expose the app on port 80
     environment:
