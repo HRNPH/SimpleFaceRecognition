@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import datetime
 from http.client import HTTPException
 from typing import Annotated, Dict
 from pydantic import BaseModel, UUID4
@@ -12,8 +13,11 @@ from dotenv import load_dotenv
 from app.controller import FaceRecognitionController
 from app.libs.firebase_logger import FirebaseAuthenticationLogs
 from app.libs.auth import check_api_key
+from app.libs.notification import LineNotify
 import app.models.schemas as schemas
 from app.libs.exception_handler import app_exception_handler
+from app.db.prisma import db
+from app.libs.s3 import S3Uploader
 import os
 
 load_dotenv()
@@ -26,6 +30,8 @@ async def root() -> str:
 
 controller = FaceRecognitionController()
 firebase_logger = FirebaseAuthenticationLogs()
+line_notify_client = LineNotify()
+s3_client = S3Uploader()
 
 
 @post(
@@ -44,11 +50,33 @@ async def inference(
 ) -> schemas.DefaultResponse:
     check_api_key(request.headers)  # Raises HTTPException if API key is invalid
     response = await controller.process_face_recognition(data)
-    firebase_logger.log(
-        schemas.FirebaseLog(
-            **response.model_dump(),
+
+    # Logging and Notification
+    # -- Construct log data
+    time_stamp = datetime.datetime.now()
+    image_uploaded = (
+        s3_client.upload(
             image_base64=data.image_base64,
+            file_path=f"images/{response.rfid}/{time_stamp.isoformat()}.png",
         )
+        if data.image_base64
+        else None
+    )
+    log_data = schemas.FirebaseLog(
+        **response.model_dump(),
+        image_base64=data.image_base64,
+        image_url=image_uploaded,
+        createdAt=time_stamp,
+    )
+    firebase_logger.log(log_data)  # Log to Firebase
+    # -- Send notification to LINE
+    line_notify_client.send(
+        line_notify_client.template(
+            name=response.rfid,
+            success=response.success,
+            timestamp=log_data.createdAt.isoformat(),  # Convert datetime to ISO 8601
+            image_url=image_uploaded,  # Send the uploaded image URL if available
+        ),
     )
     return response
 

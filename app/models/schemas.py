@@ -42,6 +42,7 @@ class DefaultResponse(BaseModel):
         None, description="Temperature value of the individual."
     )
     rfid: Optional[str] = Field(None, description="RFID identifier for the user.")
+    name: Optional[str] = Field(None, description="Name of the user.")
 
     class Config:
         json_schema_extra = {
@@ -88,6 +89,9 @@ class FirebaseLog(DefaultResponse):  # Extend DefaultResponse
     )
     image_base64: Optional[str] = Field(
         None, description="Base64 encoded image of the individual."
+    )
+    image_url: Optional[str] = Field(
+        None, description="URL of the uploaded image in the S3 bucket."
     )
 
     def to_firebase_dict(self):

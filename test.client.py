@@ -74,7 +74,8 @@ class APIClient:
 
 # Example usage
 if __name__ == "__main__":
-    api_url = os.getenv("API_URL", "http://localhost:8080/api/v1/")
+    # api_url = os.getenv("API_URL", "http://localhost:8080/api/v1/")
+    api_url = "http://localhost:8000/api/v1/"
     api_key = os.environ["API_KEY"]
 
     # Config

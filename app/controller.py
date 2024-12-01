@@ -14,7 +14,7 @@ from app.db.prisma import db
 import base64
 import cv2 as cv
 from prisma import Base64
-from app.libs.logging import logger
+from app.libs.logutils import logger
 
 
 class FaceRecognitionController:

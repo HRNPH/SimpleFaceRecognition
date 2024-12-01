@@ -4,7 +4,7 @@ from firebase_admin import credentials
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from app.models.schemas import FirebaseLog
-from app.libs.logging import logger
+from app.libs.logutils import logger
 import os
 import base64
 
