@@ -1,0 +1,17 @@
+
+services:
+  app:
+    image: hrnph/embed:latest
+    ports:
+      - "80:8000"  # Expose the app on port 80
+    environment:
+      - PORT=8000  # Ensure the app listens on the right port
+    volumes:
+      - .:/app  # Mount the app code for development (optional)
+      - /root/.cache:/root/.cache  # Cache Prisma binaries for efficiency
+    command: gunicorn -w 1 -k uvicorn.workers.UvicornWorker --bind [::]:8000 app.main:app --timeout 120
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8000/"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
