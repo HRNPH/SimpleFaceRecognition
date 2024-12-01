@@ -43,7 +43,7 @@ async def inference(
     data: schemas.FaceRecognitionRequest,
 ) -> schemas.DefaultResponse:
     check_api_key(request.headers)  # Raises HTTPException if API key is invalid
-    return controller.process_face_recognition(data)
+    return await controller.process_face_recognition(data)
 
 
 @post(

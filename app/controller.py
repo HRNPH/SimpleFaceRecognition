@@ -14,6 +14,7 @@ from db.prisma import db
 import base64
 import cv2 as cv
 from prisma import Base64
+from libs.logging import logger
 
 
 class FaceRecognitionController:
@@ -24,7 +25,7 @@ class FaceRecognitionController:
         """
         self.recognition_model = FaceRecognition()
 
-    def process_face_recognition(
+    async def process_face_recognition(
         self, request: FaceRecognitionRequest
     ) -> DefaultResponse:
         """
@@ -54,40 +55,50 @@ class FaceRecognitionController:
         # Step 2: Crop the First Detected Face
         cropped_face = FaceRecognition.Utility.face_crop(image, boxes)
 
-        # Step 3: Generate Face Embedding
+        # Step 3: Generate Input, Face Embedding
         face_embedding = self.recognition_model._face_net(cropped_face)[0]
 
-        # Step 4: Verify Against Database
-        # source_face = self.database.get_faces(request.rfid)
-        source_face = True  # Mock
-        if source_face is None:
-            return DefaultResponse(
-                message="Identity not found in the database",
-                success=False,
+        # Step 4: Verify Against Database, Grab Precomputed Face Embedding
+        async with db:
+            user = await db.user.find_unique(
+                where={"rfid": request.rfid},
+                include={"faceDatabases": True},
+            )
+            if (
+                user is None
+                or user.faceDatabases is None
+                or len(user.faceDatabases) == 0
+            ):
+                return DefaultResponse(
+                    message="Identity not found in the database",
+                    success=False,
+                )
+
+            logger.debug("DB Face Shape: ", user.faceDatabases[0].vector)
+            source_vector = np.frombuffer(
+                Base64.decode(user.faceDatabases[0].vector), np.float32
+            )
+            logger.debug(f"Source Face Shape: {source_vector}")
+
+            is_same_face, similarity, threshold = (
+                FaceRecognition.Utility.is_the_same_face(source_vector, face_embedding)
             )
 
-        # is_same_face, similarity, threshold = FaceRecognition.Utility.is_the_same_face(
-        #     source_face, face_embedding, threshold=request.threshold
-        # )
-
-        is_same_face, similarity = (
-            random.choice([True, False]),
-            random.uniform(0, 1),
-        )  # Mock
-
-        # Step 5: Generate Response
-        if is_same_face:
-            return DefaultResponse(
-                message="Face verified successfully",
-                success=True,
-                similarity=similarity,
-            )
-        else:
-            return DefaultResponse(
-                message="Face does not match",
-                success=False,
-                similarity=similarity,
-            )
+            # Step 5: Generate Response
+            if is_same_face:
+                return DefaultResponse(
+                    message="Face verified successfully",
+                    success=True,
+                    similarity=similarity,
+                    threshold=threshold,
+                )
+            else:
+                return DefaultResponse(
+                    message="Face does not match",
+                    success=False,
+                    similarity=similarity,
+                    threshold=threshold,
+                )
 
     async def add_face_to_database(self, request: UserCreationRequest) -> Response:
         """

@@ -29,6 +29,12 @@ class DefaultResponse(BaseModel):
         None,
         description="Message for a successful operation, Reason for failure if the operation was not successful.",
     )
+    similarity: Optional[float] = Field(
+        None, description="Similarity score between the two faces."
+    )
+    threshold: Optional[float] = Field(
+        None, description="Threshold value for the similarity score."
+    )
 
     class Config:
         json_schema_extra = {
