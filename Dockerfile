@@ -18,8 +18,10 @@ WORKDIR /app
 COPY prisma ./prisma
 
 # Install Prisma CLI python
+# Copy production requirements and install dependencies
 COPY requirements.prod.txt ./
-RUN pip install prisma
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir -r requirements.prod.txt
 
 # Generate Prisma client
 RUN python -m prisma generate
@@ -29,15 +31,15 @@ FROM base AS base-prod
 
 WORKDIR /app
 
-# Copy production requirements and install dependencies
-COPY requirements.prod.txt ./
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir -r requirements.prod.txt
+# Copy Over installed dependencies python dependencies
+COPY --from=prisma-builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=prisma-builder /usr/local/bin /usr/local/bin
 
 # Add application code and Prisma client
 COPY . ./
 COPY --from=prisma-builder /app/prisma ./prisma
-COPY --from=prisma-builder /app/.prisma ./prisma/.prisma
+
+
 
 # Expose port
 ENV PORT=8000
