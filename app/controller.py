@@ -50,6 +50,7 @@ class FaceRecognitionController:
             return DefaultResponse(
                 message="No face detected in the image",
                 success=False,
+                rfid=request.rfid,
             )
 
         # Step 2: Crop the First Detected Face
@@ -74,31 +75,28 @@ class FaceRecognitionController:
                     success=False,
                 )
 
-            logger.debug("DB Face Shape: ", user.faceDatabases[0].vector)
             source_vector = np.frombuffer(
                 Base64.decode(user.faceDatabases[0].vector), np.float32
             )
-            logger.debug(f"Source Face Shape: {source_vector}")
 
             is_same_face, similarity, threshold = (
                 FaceRecognition.Utility.is_the_same_face(source_vector, face_embedding)
             )
 
             # Step 5: Generate Response
-            if is_same_face:
-                return DefaultResponse(
-                    message="Face verified successfully",
-                    success=True,
-                    similarity=similarity,
-                    threshold=threshold,
-                )
-            else:
-                return DefaultResponse(
-                    message="Face does not match",
-                    success=False,
-                    similarity=similarity,
-                    threshold=threshold,
-                )
+            message, success = (
+                ("Face does not match", False)
+                if not is_same_face
+                else ("Face verified successfully", True)
+            )
+            return DefaultResponse(
+                message=message,
+                success=success,
+                similarity=similarity,
+                threshold=threshold,
+                temperature=request.temperature,
+                rfid=request.rfid,
+            )
 
     async def add_face_to_database(self, request: UserCreationRequest) -> Response:
         """

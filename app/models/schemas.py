@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from datetime import date, datetime
 from typing import Optional
 
 
@@ -22,6 +23,8 @@ class FaceRecognitionRequest(BaseModel):
 
 
 class DefaultResponse(BaseModel):
+    """Response model for the API, Also used for logging to firebase."""
+
     success: bool = Field(
         ..., description="Indicates whether the operation was successful."
     )
@@ -35,6 +38,10 @@ class DefaultResponse(BaseModel):
     threshold: Optional[float] = Field(
         None, description="Threshold value for the similarity score."
     )
+    temperature: Optional[float] = Field(
+        None, description="Temperature value of the individual."
+    )
+    rfid: Optional[str] = Field(None, description="RFID identifier for the user.")
 
     class Config:
         json_schema_extra = {
@@ -71,4 +78,20 @@ class UserCreationRequest(BaseModel):
                 "name": "John Doe",
                 "image_base64": "/9j/4AAQSkZJRgABAQAAAQABAAD... (truncated base64)",
             }
+        }
+
+
+# Firebaselog
+class FirebaseLog(DefaultResponse):  # Extend DefaultResponse
+    createdAt: datetime = Field(
+        ..., description="Time of creation of the log.", default_factory=datetime.now
+    )
+
+    def to_firebase_dict(self):
+        """Convert the object to a dictionary for Firebase."""
+        return {
+            **self.model_dump(
+                exclude={"createdAt"}
+            ),  # Include all fields except createdAt
+            "createdAt": self.createdAt.isoformat(),  # Convert datetime to ISO 8601
         }

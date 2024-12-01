@@ -8,12 +8,11 @@ from litestar.params import Body
 from litestar import exceptions
 from litestar.openapi.spec import Components, SecurityScheme, Tag
 from litestar.openapi.plugins import SwaggerRenderPlugin
-from litestar.datastructures import Headers
 from dotenv import load_dotenv
 from controller import FaceRecognitionController
+from libs.firebase_logger import FirebaseAuthenticationLogs
 from libs.auth import check_api_key
 import models.schemas as schemas
-from libs.logging import logger
 from libs.exception_handler import app_exception_handler
 import os
 
@@ -26,6 +25,7 @@ async def root() -> str:
 
 
 controller = FaceRecognitionController()
+firebase_logger = FirebaseAuthenticationLogs()
 
 
 @post(
@@ -43,7 +43,13 @@ async def inference(
     data: schemas.FaceRecognitionRequest,
 ) -> schemas.DefaultResponse:
     check_api_key(request.headers)  # Raises HTTPException if API key is invalid
-    return await controller.process_face_recognition(data)
+    response = await controller.process_face_recognition(data)
+    firebase_logger.log(
+        schemas.FirebaseLog(
+            **response.model_dump(),
+        )
+    )
+    return response
 
 
 @post(
@@ -61,7 +67,9 @@ async def create(
     data: schemas.UserCreationRequest,
 ) -> schemas.DefaultResponse:
     check_api_key(request.headers)  # Raises HTTPException if API key is invalid
-    return await controller.add_face_to_database(data)
+    response = await controller.add_face_to_database(data)
+    firebase_logger.log()
+    return
 
 
 app = Litestar(
