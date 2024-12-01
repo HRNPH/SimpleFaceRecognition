@@ -26,6 +26,8 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Generate Prisma client
 RUN python -m prisma generate
 
+COPY . ./
+
 # Expose port
 ENV PORT=8000
 EXPOSE $PORT
