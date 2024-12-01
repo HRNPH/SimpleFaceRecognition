@@ -1,4 +1,5 @@
 import base64
+import os
 import random
 import requests
 
@@ -73,12 +74,14 @@ class APIClient:
 
 # Example usage
 if __name__ == "__main__":
-    api_url = "http://localhost:8000/api/v1/"
-    api_key = "kuy"
-    # image_path = "local/experiment/faces/focus/source.png"
+    api_url = os.getenv("API_URL", "http://localhost:8080/api/v1/")
+    api_key = os.environ["API_KEY"]
+
+    # Config
+    image_path = "local/experiment/faces/tarn/1.png"
     # image_path = "local/experiment/faces/guide/1.png"
-    rfid = "test"
-    name = "focus"
+    rfid = "tarn"
+    name = "Nattapon"
 
     client = APIClient(api_url, api_key)
     # response = client.create_entry(rfid, name, image_path)
