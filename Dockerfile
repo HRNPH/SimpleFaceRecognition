@@ -33,8 +33,7 @@ ENV PORT=8000
 EXPOSE $PORT
 
 # Run the application
-ENTRYPOINT ["/bin/bash", "-c"]
-CMD "prisma generate && gunicorn -w 1 -k uvicorn.workers.UvicornWorker --bind [::]:8000 app.main:app --timeout 120"
+CMD ["gunicorn", "-w", "1", "-k", "uvicorn.workers.UvicornWorker", "--bind", "[::]:8000", "app.main:app", "--timeout", "120"]
 
 # Add a healthcheck
 HEALTHCHECK --interval=5s --timeout=3s --start-period=5s --retries=3 CMD curl --fail http://127.0.0.1:$PORT/ || exit 1
